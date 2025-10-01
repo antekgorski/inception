@@ -1,0 +1,14 @@
+# Secrets
+secrets/*.txt
+
+# Environment files (if they contain sensitive data)
+# srcs/.env
+
+# Docker volumes
+*_data/
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store

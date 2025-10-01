@@ -1,0 +1,13 @@
+# Environment files with sensitive data
+srcs/.env
+
+# Data directories
+data/
+
+# Docker volumes
+*.log
+
+# System files
+.DS_Store
+.vscode/
+.idea/

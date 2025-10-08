@@ -1,0 +1,4 @@
+DOCKER
+
+sudo docker build -t test . -duduje obraz doskera
+sudo docker images -wuswietla obrazy

@@ -1,0 +1,14 @@
+# secrets for mariadb... Uncomment if you want to use them
+# secrets:
+#   mariadb_root_pass:
+#     file: ./secrets/mariadb_root_pass.txt
+#   mariadb_password:
+#     file: ./secrets/mariadb_password.txt
+
+
+# env_file for mariadb... Uncomment if you want to use it
+# services:
+#   mariadb:
+#     image: mariadb
+#     env_file:
+#       - .env

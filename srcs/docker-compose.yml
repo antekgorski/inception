@@ -6,6 +6,9 @@ services:
     container_name: mariadb
     restart: unless-stopped
     env_file: .env
+    secrets:
+      - mariadb_root_password
+      - mariadb_password
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
@@ -18,6 +21,10 @@ services:
     container_name: wordpress
     restart: unless-stopped
     env_file: .env
+    secrets:
+      - mariadb_password
+      - wp_admin_password
+      - wp_user_password
     volumes:
       - wordpress_data:/var/www/html
     networks:
@@ -58,3 +65,13 @@ volumes:
 networks:
   inception:
     driver: bridge
+
+secrets:
+  mariadb_root_password:
+    file: ../secrets/mariadb_root_password.txt
+  mariadb_password:
+    file: ../secrets/mariadb_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt

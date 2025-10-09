@@ -35,12 +35,20 @@ This project sets up a Docker infrastructure with three services:
 
 ### Configuration
 
-1. Edit `srcs/.env` file with your credentials:
-   - Change all passwords (marked with `changeme_`)
-   - Update domain name if needed
-   - Set WordPress admin and user credentials
+1. Create secret files in the `secrets/` directory:
+   ```bash
+   echo "your_strong_root_password" > secrets/mariadb_root_password.txt
+   echo "your_strong_user_password" > secrets/mariadb_password.txt
+   echo "your_admin_password" > secrets/wp_admin_password.txt
+   echo "your_user_password" > secrets/wp_user_password.txt
+   ```
 
-2. Build and start the containers:
+2. Edit `srcs/.env` file with your configuration:
+   - Update domain name if needed
+   - Set database and WordPress settings
+   - **Note**: Passwords are now managed via Docker secrets (see step 1)
+
+3. Build and start the containers:
    ```bash
    make
    ```
@@ -65,13 +73,17 @@ Data is stored in:
 
 ## Security Notes
 
-⚠️ **Important**: Before deploying, change all default passwords in `srcs/.env`!
+⚠️ **Important**: This project uses Docker secrets for sensitive data!
 
-The default `.env` file contains placeholder passwords that should be changed:
-- `MYSQL_PASSWORD`
-- `MYSQL_ROOT_PASSWORD`
-- `WP_ADMIN_PASSWORD`
-- `WP_USER_PASSWORD`
+Passwords are stored in the `secrets/` directory and mounted as Docker secrets:
+- `secrets/mariadb_root_password.txt` - MariaDB root password
+- `secrets/mariadb_password.txt` - MariaDB user password
+- `secrets/wp_admin_password.txt` - WordPress admin password
+- `secrets/wp_user_password.txt` - WordPress user password
+
+These files are excluded from git via `.gitignore` to prevent committing sensitive data.
+
+**Before running the project**, you must create these files with strong passwords!
 
 ## Accessing WordPress
 

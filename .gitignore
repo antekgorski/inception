@@ -1,0 +1,27 @@
+# Environment variables with sensitive data
+srcs/.env.local
+*.env.local
+
+# Secrets
+secrets/*.txt
+!secrets/.gitkeep
+
+# Data volumes
+data/
+
+# Docker
+.docker/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

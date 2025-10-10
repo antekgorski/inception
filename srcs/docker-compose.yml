@@ -1,14 +1,77 @@
-# secrets for mariadb... Uncomment if you want to use them
-# secrets:
-#   mariadb_root_pass:
-#     file: ./secrets/mariadb_root_pass.txt
-#   mariadb_password:
-#     file: ./secrets/mariadb_password.txt
+services:
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    container_name: mariadb
+    restart: unless-stopped
+    env_file: .env
+    secrets:
+      - mariadb_root_password
+      - mariadb_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception
 
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
+    secrets:
+      - mariadb_password
+      - wp_admin_password
+      - wp_user_password
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception
+    depends_on:
+      - mariadb
 
-# env_file for mariadb... Uncomment if you want to use it
-# services:
-#   mariadb:
-#     image: mariadb
-#     env_file:
-#       - .env
+  nginx:
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
+
+networks:
+  inception:
+    driver: bridge
+
+secrets:
+  mariadb_root_password:
+    file: ../secrets/mariadb_root_password.txt
+  mariadb_password:
+    file: ../secrets/mariadb_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt

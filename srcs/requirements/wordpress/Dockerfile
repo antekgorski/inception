@@ -1,6 +1,5 @@
 FROM debian:bullseye
 
-RUN mkdir -p /run/php && chown www-data:www-data /run/php
 RUN apt-get update && apt-get install -y \
     php7.4-fpm \
     php7.4-mysql \
@@ -13,28 +12,28 @@ RUN apt-get update && apt-get install -y \
     php7.4-xmlrpc \
     php7.4-zip \
     curl \
-    wget \
-    mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
 
-# Copy PHP-FPM configuration
-COPY wp.conf /etc/php/7.4/fpm/pool.d/wp.conf
+# Create directory for PHP-FPM socket
+RUN mkdir -p /run/php
 
-# Copy and set permissions for setup script
-COPY tools/wordpress-setup.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/wordpress-setup.sh
+# Copy configuration files
+COPY tools/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Create working directory
-WORKDIR /var/www/html
+# Configure PHP-FPM to listen on port 9000
+RUN sed -i 's/listen = \/run\/php\/php7.4-fpm.sock/listen = 9000/g' /etc/php/7.4/fpm/pool.d/www.conf
 
 # Expose PHP-FPM port
 EXPOSE 9000
 
-# Run setup script and PHP-FPM
-ENTRYPOINT ["/usr/local/bin/wordpress-setup.sh"]
-CMD ["php-fpm7.4", "-F"]
+# Set working directory
+WORKDIR /var/www/html
+
+# Run entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]

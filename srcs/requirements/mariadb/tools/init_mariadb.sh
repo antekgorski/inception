@@ -21,7 +21,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         sleep 1
     done
 
-    for s in mariadb_root_pass mariadb_password; do
+    for s in mariadb_root_password mariadb_password; do
     [ -s "/run/secrets/$s" ] || { echo "Missing secret: $s" >&2; exit 1; }
     done
 
@@ -30,7 +30,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     done
 
     echo "Configuring database and user..."
-    mysql -u root --password="$(cat /run/secrets/mariadb_root_password)" <<-EOSQL
+    mysql -u root <<-EOSQL
     CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\`;
     CREATE USER IF NOT EXISTS '$MARIADB_USER'@'%' IDENTIFIED BY '$(cat /run/secrets/mariadb_password)';
     GRANT ALL PRIVILEGES ON \`$MARIADB_DATABASE\`.* TO '$MARIADB_USER'@'%';
@@ -39,7 +39,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 EOSQL
 
     echo "Shutting down temporary MariaDB..."
-    mysqladmin -u root shutdown
+    mysqladmin -u root --password="$(cat /run/secrets/mariadb_root_password)" shutdown
 
     echo "MariaDB initialized successfully!"
 fi

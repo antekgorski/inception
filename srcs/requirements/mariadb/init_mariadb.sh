@@ -1,49 +1,45 @@
 #!/bin/bash
-# Exit immediately if a command exits with a non-zero status
 set -e
 
+# Get passwords from secrets
+DB_PASSWORD=$(cat /run/secrets/db_password)
+ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
+mkdir -p /run/mysqld
+chown -R mysql:mysql /var/lib/mysql /run/mysqld
 
-# Initialize MariaDB if not already done
+# Initialize if needed
 if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing MariaDB data directory..."
-    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
-
-    # Start temporary server
-    mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
-    
-    echo "Waiting for MariaDB to start..."
-    for i in {1..30}; do
-        if mysqladmin ping --silent; then
-            echo "MariaDB is up!"
-            break
-        fi
-        sleep 1
-    done
-
-    for s in mariadb_root_pass mariadb_password; do
-    [ -s "/run/secrets/$s" ] || { echo "Missing secret: $s" >&2; exit 1; }
-    done
-
-    for v in MARIADB_DATABASE MARIADB_USER; do
-    [ -n "${!v}" ] || { echo "Missing env var: $v" >&2; exit 1; }
-    done
-
-    echo "Configuring database and user..."
-    mysql -u root --password="$(cat /run/secrets/mariadb_root_password)" <<-EOSQL
-    CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\`;
-    CREATE USER IF NOT EXISTS '$MARIADB_USER'@'%' IDENTIFIED BY '$(cat /run/secrets/mariadb_password)';
-    GRANT ALL PRIVILEGES ON \`$MARIADB_DATABASE\`.* TO '$MARIADB_USER'@'%';
-    ALTER USER 'root'@'localhost' IDENTIFIED BY '$(cat /run/secrets/mariadb_root_password)';
-    FLUSH PRIVILEGES;
-EOSQL
-
-    echo "Shutting down temporary MariaDB..."
-    mysqladmin -u root shutdown
-
-    echo "MariaDB initialized successfully!"
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql
 fi
 
-# Start MariaDB normally
+# Check if database configuration is needed
+DB_EXISTS=$([ -d "/var/lib/mysql/$MYSQL_DATABASE" ] && echo "yes" || echo "no")
+
+if [ "$DB_EXISTS" = "no" ] || [ ! -f "/var/lib/mysql/.user_created" ]; then
+    echo "Setting up database and user..."
+    
+    # Start temp server to create database and user
+    mysqld --user=mysql --skip-networking --socket=/run/mysqld/mysqld.sock &
+    
+    # Wait for start
+    while ! mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do sleep 1; done
+    
+    # Create database and user
+    mysql --socket=/run/mysqld/mysqld.sock -u ${MYSQL_ROOT_USER:-root} << EOF
+CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
+CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';
+ALTER USER '${MYSQL_ROOT_USER:-root}'@'localhost' IDENTIFIED BY '$ROOT_PASSWORD';
+FLUSH PRIVILEGES;
+EOF
+    
+    mysqladmin --socket=/run/mysqld/mysqld.sock -u ${MYSQL_ROOT_USER:-root} -p$ROOT_PASSWORD shutdown
+    touch /var/lib/mysql/.user_created
+    echo "Database and user setup completed successfully."
+else
+    echo "Database and user already configured. Skipping setup."
+fi
+
 echo "Starting MariaDB..."
 exec mysqld --user=mysql --bind-address=0.0.0.0

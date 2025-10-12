@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy initialization script
-COPY tools/init_mariadb.sh /usr/local/bin/
+COPY init_mariadb.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init_mariadb.sh
 
 # Expose MariaDB port

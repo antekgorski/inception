@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     mariadb-client \
+    sudo \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install WP-CLI
@@ -22,8 +24,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-# Copy PHP-FPM configuration
+# Copy PHP-FPM configuration and remove default
 COPY wp.conf /etc/php/7.4/fpm/pool.d/wp.conf
+RUN rm -f /etc/php/7.4/fpm/pool.d/www.conf
 
 # Copy and set permissions for setup script
 COPY tools/wordpress-setup.sh /usr/local/bin/

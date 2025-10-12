@@ -1,4 +1,19 @@
 DOCKER
-
+sudo systemctl status docker
+sudo systemctl start docker
 sudo docker build -t test . -duduje obraz doskera
 sudo docker images -wuswietla obrazy
+sudo docker ps
+sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+curl -k -I https://localhost:443
+sudo docker logs wordpress
+sudo docker exec wordpress ping -c 1 mariadb
+
+ssl test:
+sudo docker exec nginx ls -la /etc/nginx/ssl/
+curl -k --tlsv1.2 --tls-max 1.2 -I https://antgor.42.fr
+curl -k --tlsv1.3 --tls-max 1.3 -I https://antgor.42.fr
+curl -k --tlsv1.1 --tls-max 1.1 -I https://antgor.42.fr
+
+https://antgor.42.fr/wp-admin
+sudo docker volume ls

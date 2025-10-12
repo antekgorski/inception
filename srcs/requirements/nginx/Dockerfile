@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy nginx conf and entrypoint script
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY --chmod=755 tools/entrypoint.sh /entrypoint.sh
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
 # Open ports for https 
 EXPOSE 443

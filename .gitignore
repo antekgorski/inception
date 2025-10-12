@@ -1,0 +1,45 @@
+# Environment variable files
+.env
+srcs/.env
+
+# Secrets directories and files
+secrets/
+srcs/secrets/
+**/*.txt
+
+# Docker volumes and data
+data/
+/home/*/data/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker build cache
+.docker/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp

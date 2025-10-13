@@ -17,6 +17,8 @@ curl -k --tlsv1.1 --tls-max 1.1 -I https://antgor.42.fr
 
 https://antgor.42.fr/wp-admin
 sudo docker volume ls
+docker volume inspect srcs_wordpress_data
+docker volume inspect srcs_mariadb_data
 
 # Sprawdź czy domena jest w /etc/hosts
 cat /etc/hosts | grep antgor
